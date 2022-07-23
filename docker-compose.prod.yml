@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  # Different configuration files for data producers
+  data_producer_eth:
+    command: [ "python3", "-m", "app.main", "--cfg", "etc/cfg/prod/eth.json" ]
+
+  data_producer_etc:
+    command: [ "python3", "-m", "app.main", "--cfg", "etc/cfg/prod/etc.json" ]
+
+  data_producer_bsc:
+    command: [ "python3", "-m", "app.main", "--cfg", "etc/cfg/prod/bsc.json" ]

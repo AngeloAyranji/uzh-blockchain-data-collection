@@ -1,0 +1,17 @@
+.env
+.env.dev
+venv/
+
+.vscode/*
+
+**/__pycache__/
+
+
+# Javascript
+**/node_modules/*
+node_modules/
+
+# Tests
+.tox/
+htmlcov/
+.coverage

@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  # Different configuration files for data producers
+  data_producer_eth:
+    command: [ "python3", "-m", "app.main", "--cfg", "etc/cfg/dev/eth.json" ]
+    depends_on:
+      - db
+      - kafka
+
+  data_producer_etc:
+    command: [ "python3", "-m", "app.main", "--cfg", "etc/cfg/dev/etc.json" ]
+    depends_on:
+      - db
+      - kafka
+
+  data_producer_bsc:
+    command: [ "python3", "-m", "app.main", "--cfg", "etc/cfg/dev/bsc.json" ]
+    depends_on:
+      - db
+      - kafka
+
+  # PostgreSQL only on dev
+  db:
+    build:
+      context: ./src/db
+    ports:
+      - 5432:5432
+    env_file:
+      - ./src/db/.env
+    # Persistent storage
+    volumes:
+      - ./src/db/db-data:/var/lib/postgresql/data
