@@ -118,7 +118,7 @@ pyparsing==3.0.9
     # via packaging
 pyrsistent==0.18.1
     # via jsonschema
-requests==2.28.1
+requests==2.31.0
     # via
     #   ipfshttpclient
     #   web3
@@ -131,9 +131,7 @@ six==1.16.0
     #   multiaddr
     #   parsimonious
 tomli==2.0.1
-    # via
-    #   build
-    #   pep517
+    # via pep517
 toolz==0.12.0
     # via cytoolz
 typing-extensions==4.3.0
