@@ -1,0 +1,29 @@
+
+name: Unit tests
+
+on:
+  push:
+    branches-ignore:
+      - 'main'
+    paths:
+      - .github/workflows/test-unit.yaml
+      - scripts/tests/run-tests-unit.sh
+      # Python
+      - 'src/data_collection/app/**'
+      - 'src/data_collection/tests/unit/**'
+      - 'src/data_collection/Dockerfile.tests'
+      - 'src/data_collection/pytest.ini'
+      - 'src/data_collection/requirements-tests.in'
+      - 'src/data_collection/requirements-tests.txt'
+
+jobs:
+  test:
+    name: unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Run docker-compose.tests.yml
+        run: bash scripts/tests/run-tests-unit.sh
+        shell: bash

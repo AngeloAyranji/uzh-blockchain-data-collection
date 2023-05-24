@@ -1,0 +1,6 @@
+{
+    "node_url": "https://www.ethercluster.com/etc",
+    "db_dsn": "postgres://user:postgres@db:5432/db",
+    "kafka_url": "kafka:9092",
+    "kafka_topic": "etc"
+}

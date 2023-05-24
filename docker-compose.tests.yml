@@ -1,0 +1,41 @@
+version: "3.9"
+services:
+  # PostgreSQL without persistent storage for testing
+  db:
+    build:
+      context: ./src/db
+    ports:
+      - "5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+
+  # Tests for db manager code
+  test_db:
+    build:
+      context: ./src/data_collection
+      dockerfile: Dockerfile.tests
+    command: bash -c "bash wait-for-db.sh && sleep 10 && pytest tests/db/test_manager.py"
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    depends_on:
+      - db
+
+  # Test redis
+  test_redis:
+    build:
+      context: ./src/data_collection
+      dockerfile: Dockerfile.tests
+    command: ["pytest", "tests/db/test_redis.py"]
+
+  # Unit tests
+  test_unit:
+    build:
+      context: ./src/data_collection
+      dockerfile: Dockerfile.tests
+    command: ["pytest", "tests/unit"]

@@ -1,0 +1,21 @@
+FROM python:3.11.3
+
+# Set working directory
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y postgresql-client
+
+# Copy requirements
+COPY requirements-tests.txt requirements-tests.txt
+# Install requirements
+RUN pip install -r requirements-tests.txt
+
+COPY app app
+COPY etc etc
+COPY tests tests
+COPY pytest.ini pytest.ini
+COPY scripts/wait-for-db.sh wait-for-db.sh
+
+RUN chmod +x wait-for-db.sh
+
+CMD ["pytest", "tests"]

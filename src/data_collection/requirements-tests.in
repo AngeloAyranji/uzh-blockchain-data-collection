@@ -1,0 +1,7 @@
+asyncpg
+aiokafka
+fakeredis
+pydantic
+pytest
+pytest-asyncio
+web3==6.3.0

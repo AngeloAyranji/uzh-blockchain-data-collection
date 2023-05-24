@@ -1,11 +1,45 @@
 version: "3.9"
 services:
-  # Different configuration files for data producers
+  kafka:
+    environment:
+      - KAFKA_LOG_RETENTION_BYTES=134217728 # 128 MB
+
+  # Updated network settings for data producers and consumers
   data_producer_eth:
-    command: [ "python3", "-m", "app.main", "--cfg", "etc/cfg/prod/eth.json" ]
+    command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/prod/eth.json --worker-type producer"
 
   data_producer_etc:
-    command: [ "python3", "-m", "app.main", "--cfg", "etc/cfg/prod/etc.json" ]
+    command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/prod/etc.json --worker-type producer"
 
   data_producer_bsc:
-    command: [ "python3", "-m", "app.main", "--cfg", "etc/cfg/prod/bsc.json" ]
+    command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/prod/bsc.json --worker-type producer"
+
+  data_consumer_eth:
+    command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/prod/eth.json --worker-type consumer"
+    deploy:
+      replicas: ${N_CONSUMERS}
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  data_consumer_etc:
+    command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/prod/etc.json --worker-type consumer"
+    deploy:
+      replicas: ${N_CONSUMERS}
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  data_consumer_bsc:
+    command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/prod/bsc.json --worker-type consumer"
+    deploy:
+      replicas: ${N_CONSUMERS}
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s

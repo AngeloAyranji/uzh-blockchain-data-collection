@@ -1,32 +1,26 @@
 version: "3.9"
 services:
-  # Different configuration files for data producers
+  # Different configuration files for data producers and consumers
   data_producer_eth:
-    command: [ "python3", "-m", "app.main", "--cfg", "etc/cfg/dev/eth.json" ]
-    depends_on:
-      - db
-      - kafka
+    command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/dev/eth.json --worker-type producer"
 
   data_producer_etc:
-    command: [ "python3", "-m", "app.main", "--cfg", "etc/cfg/dev/etc.json" ]
-    depends_on:
-      - db
-      - kafka
+    command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/dev/etc.json --worker-type producer"
 
   data_producer_bsc:
-    command: [ "python3", "-m", "app.main", "--cfg", "etc/cfg/dev/bsc.json" ]
-    depends_on:
-      - db
-      - kafka
+    command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/dev/bsc.json --worker-type producer"
 
-  # PostgreSQL only on dev
-  db:
-    build:
-      context: ./src/db
-    ports:
-      - 5432:5432
-    env_file:
-      - ./src/db/.env
-    # Persistent storage
-    volumes:
-      - ./src/db/db-data:/var/lib/postgresql/data
+  data_consumer_eth:
+    command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/dev/eth.json --worker-type consumer"
+    deploy:
+      replicas: 2
+
+  data_consumer_etc:
+    command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/dev/etc.json --worker-type consumer"
+    deploy:
+      replicas: 2
+
+  data_consumer_bsc:
+    command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/dev/bsc.json --worker-type consumer"
+    deploy:
+      replicas: 2

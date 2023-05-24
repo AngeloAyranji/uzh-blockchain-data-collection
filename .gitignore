@@ -1,11 +1,16 @@
+**/.DS_Store
+**/.swp
+*.log
 .env
 .env.dev
 venv/
 
 .vscode/*
+.idea/*
 
 **/__pycache__/
 
+**/.ipynb_checkpoints/
 
 # Javascript
 **/node_modules/*
@@ -15,3 +20,8 @@ node_modules/
 .tox/
 htmlcov/
 .coverage
+.pytest_cache
+
+# Data folder
+data/
+/package-lock.json

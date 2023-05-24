@@ -1,51 +1,208 @@
 version: "3.9"
 services:
-  # Kafka
-  zookeeper:
-    image: docker.io/bitnami/zookeeper:3.8
+  # PostgreSQL
+  db:
+    user: "${DATA_UID}:${DATA_GID}"
+    build:
+      context: ./src/db
+      # PostgreSQL data dir permissions (user + bdlt group)
+      args:
+        UID: "${DATA_UID}"
+        GID: "${DATA_GID}"
+    command:
+      - postgres
+      # the following lines tell pg server to adjust the TCP keepalive settings explicitly
+      # instead of reading from the container default, which is likely idle=7200 (seconds).
+      # The default value in the container is usually much larger than docker-swarm's IPVS default,
+      # which is 900. (And this is the culprit of the connection will be closed after ~15mins)
+      - -c
+      - 'tcp_keepalives_idle=600'
+      - -c
+      - 'tcp_keepalives_interval=30'
+      - -c
+      - 'tcp_keepalives_count=10'
+      - -c
+      - 'max_connections=${POSTGRES_MAX_CONNECTIONS}'
+      - -c
+      - 'listen_addresses=*'
+    group_add:
+      - ${DATA_GID}
     ports:
-      - "2181:2181"
+      - "${POSTGRES_HOST_PORT}:${POSTGRES_CONTAINER_PORT}"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    # 'environment' has priority over 'env_file'
+    env_file:
+      - ./src/db/.env
+    # Persistent storage
     volumes:
-      - "zookeeper_data:/bitnami"
+      - ${DATA_DIR}/postgresql-data:/var/lib/postgresql/data
+
+  db_pool:
+    image: bitnami/pgbouncer
+    environment:
+      POSTGRESQL_USERNAME: ${POSTGRES_USER}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRESQL_DATABASE: ${POSTGRES_DB}
+      POSTGRESQL_HOST: db
+      POSTGRESQL_PORT: ${POSTGRES_CONTAINER_PORT}
+      PGBOUNCER_PORT: ${POSTGRES_POOL_PORT}
+      PGBOUNCER_DATABASE: ${POSTGRES_DB}
+      PGBOUNCER_MAX_DB_CONNECTIONS: ${POSTGRES_MAX_CONNECTIONS}
+      PGBOUNCER_DEFAULT_POOL_SIZE: ${POSTGRES_POOL_SIZE}    # Total amount of connections to db/user database
+      PGBOUNCER_MAX_CLIENT_CONN: ${POSTGRES_POOL_SIZE}      # Total amount of connections to postgres
+
+  # Kafka (zookeeper)
+  zookeeper:
+    build:
+      context: ./src/zookeeper
+      args:
+        # Zookeeper data dir permissions (user + bdlt group)
+        ZOO_USER: ${USER}
+        ZOO_UID: ${DATA_UID}
+        ZOO_GID: ${DATA_GID}
+    user: "${USER}:${DATA_GID}"
+    ports:
+      - "2181"
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
-    logging:
-      driver: "none"
-  kafka:
-    image: docker.io/bitnami/kafka:3.2
-    ports:
-      - "9092:9092"
     volumes:
-      - "kafka_data:/bitnami"
-    environment:
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - ALLOW_PLAINTEXT_LISTENER=yes
+      - ${DATA_DIR}/zookeeper-data/data:/data
+      - ${DATA_DIR}/zookeeper-data/datalog:/datalog
+  kafka:
+    build:
+      context: ./src/kafka
+      args:
+        # Kafka data dir permissions (user + bdlt group)
+        KAFKA_USER: ${USER}
+        KAFKA_UID: ${DATA_UID}
+        KAFKA_GID: ${DATA_GID}
+    ports:
+      - "9092"
     depends_on:
       - zookeeper
+    environment:
+      # Kafka specific environment variables
+      - KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS=6000
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=false
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=10000    # delay the initial rebalancing by 10s
+      - KAFKA_LOG_DIRS=/kafka/kafka-logs
+      - KAFKA_CREATE_TOPICS=eth:${KAFKA_N_PARTITIONS}:1,etc:${KAFKA_N_PARTITIONS}:1,bsc:${KAFKA_N_PARTITIONS}:1
+    volumes:
+      - ${DATA_DIR}/kafka-data:/kafka
+
+  # Redis
+  redis:
+    image: redis
+    ports:
+      - "6379"
 
   # Data producers
   data_producer_eth:
     build:
-      context: ./src/data_producer
-    profiles: ["eth"]
+      context: ./src/data_collection
+    volumes:
+      - ./src/data_collection/etc:/app/etc
+    profiles: ["eth", "all"]
+    network_mode: "bridge"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - kafka
+      - redis
+      - db
+    env_file:
+      - .env
 
   data_producer_etc:
     build:
-      context: ./src/data_producer
-    profiles: ["etc"]
+      context: ./src/data_collection
+    volumes:
+      - ./src/data_collection/etc:/app/etc
+    profiles: ["etc", "all"]
+    network_mode: "bridge"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - kafka
+      - redis
+      - db
+    env_file:
+      - .env
 
   data_producer_bsc:
     build:
-      context: ./src/data_producer
-    profiles: ["bsc"]
+      context: ./src/data_collection
+    volumes:
+      - ./src/data_collection/etc:/app/etc
+    profiles: ["bsc", "all"]
+    network_mode: "bridge"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - kafka
+      - redis
+      - db
+    env_file:
+      - .env
 
-  # Transaction consumers
+  # Data consumers
+  data_consumer_eth:
+    build:
+      context: ./src/data_collection
+    volumes:
+      - ./src/data_collection/etc:/app/etc
+    profiles: ["eth", "all"]
+    network_mode: "bridge"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - data_producer_eth
+      - kafka
+      - redis
+      - db
+    env_file:
+      - .env
+
+  data_consumer_etc:
+    build:
+      context: ./src/data_collection
+    volumes:
+      - ./src/data_collection/etc:/app/etc
+    profiles: ["etc", "all"]
+    network_mode: "bridge"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - data_producer_etc
+      - kafka
+      - redis
+      - db
+    env_file:
+      - .env
+
+  data_consumer_bsc:
+    build:
+      context: ./src/data_collection
+    volumes:
+      - ./src/data_collection/etc:/app/etc
+    profiles: ["bsc", "all"]
+    network_mode: "bridge"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - data_producer_bsc
+      - kafka
+      - redis
+      - db
+    env_file:
+      - .env
 
 # Kafka related config
 # see: https://github.com/bitnami/bitnami-docker-kafka/blob/a576f9847c9ed455645d6540a7f32e7935e6b4d7/docker-compose.yml#L24

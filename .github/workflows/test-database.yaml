@@ -1,0 +1,47 @@
+
+name: Database integration tests
+
+on:
+  push:
+    branches-ignore:
+      - 'main'
+    paths:
+      - '.github/workflows/test-database.yaml'
+      - 'scripts/tests/**'
+      # SQL
+      - 'src/db/**'
+      # Python
+      - 'src/data_collection/app/db/**'
+      - 'src/data_collection/tests/db/**'
+      - 'src/data_collection/Dockerfile.tests'
+      - 'src/data_collection/pytest.ini'
+      - 'src/data_collection/requirements-tests.in'
+      - 'src/data_collection/requirements-tests.txt'
+      - 'src/data_collection/scripts/wait-for-db.sh'
+
+env:
+  IMAGE_NAME: ${{ github.repository }}
+  GHCR: ghcr.io
+
+jobs:
+  test_postgres:
+    name: PostgreSQL integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Run docker-compose.tests.yml test_db
+        run: docker compose -f docker-compose.tests.yml up test_db --build --abort-on-container-exit
+        shell: bash
+
+  test_redis:
+    name: Redis integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Run redis tests
+        run: bash scripts/tests/run-tests-redis.sh
+        shell: bash

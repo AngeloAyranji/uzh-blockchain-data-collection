@@ -1,0 +1,34 @@
+name: docs
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    name: Publish docs to gh_pages branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v3
+      - name: Setup python
+        uses: actions/setup-python@v4
+      - run: pip install handsdown mkdocs mkdocs-material
+      - name: Generate documentation
+        run: handsdown --external `git config --get remote.origin.url` --create-configs --theme=material -n "Blockchain data collection" --exclude src/data_collection/tests
+      - run: cp README.md HANDSDOWN.md
+      - run: python -m mkdocs build
+
+      - name: Publish current workdir (which contains generated content) to GitHub Pages
+        uses: rayluo/github-pages-overwriter@v1.3
+
+        with:
+          # Optional. Default value "." means the root directory of your project will be published.
+          # You can use whatever directory your project uses, for example "wwwroot".
+          # Such a directory does *not* have to already exist in your repo,
+          # it could be an output directory created dynamically by your static website builder.
+          source-directory: site
+
+          # Optional. Default value "gh_pages".
+          # It specifies the temporary branch which hosts the static website.
+          # Each build will OVERWRITE this branch.
+          target-branch: gh_pages

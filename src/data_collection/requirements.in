@@ -1,0 +1,7 @@
+aiokafka==0.8.0
+asyncpg
+pydantic
+sentry-sdk
+redis==4.5.5
+uvloop
+web3==6.3.0
