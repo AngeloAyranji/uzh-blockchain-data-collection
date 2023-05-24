@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/uzh-eth-mp/app/compare/v1.0.0...v1.0.1) (2023-05-24)
+
+
+### Continuous Integration
+
+* fix workflows ([4ddaf9b](https://github.com/uzh-eth-mp/app/commit/4ddaf9bdd94beba5e76d62f923942388ffc9d36e))
+
 ## [1.0.3](https://github.com/uzh-eth-mp/app/compare/v1.0.3...v1.0.3) (2023-05-24)
 
 
