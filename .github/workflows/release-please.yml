@@ -16,4 +16,4 @@ jobs:
       - uses: google-github-actions/release-please-action@v3
         with:
           release-type: simple
-          package-name: uzh-bdc
+          token: ${{ secrets.COMMIT_KEY }}
