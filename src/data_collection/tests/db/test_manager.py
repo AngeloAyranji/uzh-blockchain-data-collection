@@ -24,12 +24,11 @@ class TestInsert:
         await db_manager.insert_transaction(**transaction_data)
 
     @pytest.mark.usefixtures("clean_db")
-    async def test_insert_transaction_raises_fk_error(
+    async def test_insert_transaction_doesnt_raise_fk_error(
         self, db_manager, transaction_data
     ):
-        """Test insert of transaction data without matching block number"""
-        with pytest.raises(ForeignKeyViolationError):
-            await db_manager.insert_transaction(**transaction_data)
+        """Test insert of transaction data without matching block number doesn't raise FK error"""
+        await db_manager.insert_transaction(**transaction_data)
 
     @pytest.mark.usefixtures("clean_db")
     async def test_insert_internal_transaction(

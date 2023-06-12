@@ -20,8 +20,9 @@ A collection of Docker Containers and their orchestration for collecting EVM-com
     * [Extensions](#extensions)
     * [Querying data](#querying-data)
     * [Tools](#tools)
-* [FAQ](docs/faq.md)
-* [Contributing](docs/contributing.md)
+* [FAQ](#faq)
+* [Contributing](#contributing)
+* [License][#license]
 
 ## Overview
 
@@ -47,17 +48,19 @@ Compose files should be started with run scripts that can be found in the `scrip
 
 ```
 $ bash scripts/run-dev-eth.sh
-# use CTRL+C once to exit (doing so executes docker compose down automatically)
+# use CTRL+C once to gracefully exit (with automatic docker compose down cleanup)
 ```
 ### Deployment Environment
 There are two deployment environments available for the collection process.
 
-* Development = use for development of new features, this script will run `docker compose down` on KeyboardInterrupt (CTRL+C).
+* **Development** = use for development of new features
     * `$ bash scripts/run-dev-eth.sh`
-* Production = intended for use on Abacus-3, for long running collection of data, all containers stay alive after CTRL+C
+    * exit with CTRL+C, followed by an automatic cleanup via `docker compose down`
+* **Production** = intended for use on Abacus-3 (for long running collection of data)
     * `$ bash scripts/run-prod-eth.sh`
+    * CTRL+C only closes the logs output, containers continue running. Stopping and removing of containers is manual.
 
-Each of these environments has their own configuration `.json` files. For instance, for *development* you would find the configuration files in [`src/data_collection/etc/cfg/dev`](src/data_collection/etc/cfg/dev/). Similarly, the *production* environment config is in [`src/data_collection/etc/cfg/prod`](src/data_collection/etc/cfg/prod/).
+Each of the environments has their own configuration `.json` files. For instance, for *development* you would find the configuration files in [`src/data_collection/etc/cfg/dev`](src/data_collection/etc/cfg/dev/). Similarly, the *production* environment config is in [`src/data_collection/etc/cfg/prod`](src/data_collection/etc/cfg/prod/).
 There are minor differences between a development and production environment besides the configuration files. Details can be found in the [scripts directory](scripts/README.md).
 
 ### Configuration
@@ -66,11 +69,11 @@ Two main configuration sources (files):
 1. `.env` = static configuration variables (data directory, connection URLs, credentials, timeout settings, ...)
 2. `src/data_collection/etc/cfg/<environment>/<blockchain>.json` = data collection configuration (block range, mode, addresses, events, ...)
 
-The exact description of the environment variables and data collection configuration can be found [here](docs/configuration.md).
+The exact description of the environment variables and data collection configuration can be found in the [configuration guide](docs/configuration.md).
 
 # Features
 ### Scripts
-The [scripts/](scripts/) directory contains bash scripts that mostly consist of docker compose commands. Their detailed description can be found [here](scripts/README.md).
+The [scripts/](scripts/) directory contains bash scripts that mostly consist of docker compose commands.
 ### Extensions
 If you'd like to extend the current data collection functionality, such as:
 
@@ -87,7 +90,7 @@ To query the collected data from the database you will need a running PostgreSQL
 $ bash scripts/run-db.sh
 ```
 
-In order to then connect to the database, use:
+In order to then connect to the database, from another terminal window:
 ```
 $ docker exec -it <project_name>-db-1 psql <postgresql_dsn>
 ```
@@ -105,3 +108,5 @@ A list of frequently asked questions and their answers can be found [here](docs/
 
 ## Contributing
 Contributions are welcome and appreciated. Please follow the convention and rules described [here](docs/contributing.md).
+
+## License

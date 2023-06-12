@@ -38,7 +38,7 @@ BEGIN
   EXECUTE format('
       CREATE TABLE IF NOT EXISTS %I (
        transaction_hash varchar PRIMARY KEY,
-       block_number bigint REFERENCES %I,
+       block_number bigint,
        from_address varchar,
        to_address varchar,
        value numeric(78,18),
@@ -49,7 +49,7 @@ BEGIN
        is_token_tx boolean,
        input_data varchar,
        updated_at TIMESTAMP
-      )', node_name || '_transaction', node_name || '_block');
+      )', node_name || '_transaction');
 END
 $func$;
 
@@ -68,19 +68,20 @@ CREATE OR REPLACE FUNCTION create_table_internal_transaction(node_name varchar(3
   AS $func$
 BEGIN
   EXECUTE format('
-      CREATE TABLE IF NOT EXISTS %I (
-       unique_id UUID DEFAULT gen_random_uuid (),
-       transaction_hash varchar REFERENCES %I,
-       from_address varchar,
-       to_address varchar,
-       value numeric(78,18),
-       gas_limit bigint,
-       gas_used bigint,
-       input_data varchar,
-       call_type varchar,
-       updated_at TIMESTAMP,
-       PRIMARY KEY (unique_id)
-      )', node_name || '_internal_transaction', node_name || '_transaction');
+    CREATE TABLE IF NOT EXISTS %I (
+      transaction_hash varchar,
+      from_address varchar,
+      to_address varchar,
+      value numeric(78,18),
+      gas_limit bigint,
+      gas_used bigint,
+      input_data varchar,
+      call_type varchar,
+      updated_at TIMESTAMP
+    )', node_name || '_internal_transaction');
+  EXECUTE format('
+    CREATE INDEX IF NOT EXISTS %I
+    ON %I (transaction_hash)', node_name || '_internal_transaction_transaction_hash_idx', node_name || '_internal_transaction');
 END
 $func$;
 
@@ -100,7 +101,7 @@ CREATE OR REPLACE FUNCTION create_table_transaction_logs(node_name varchar(3))
 BEGIN
   EXECUTE format('
       CREATE TABLE IF NOT EXISTS %I (
-       transaction_hash varchar REFERENCES %I,
+       transaction_hash varchar,
        address varchar,
        log_index int,
        data varchar,
@@ -108,7 +109,7 @@ BEGIN
        topics varchar ARRAY,
        updated_at TIMESTAMP,
        PRIMARY KEY (transaction_hash, log_index)
-      )', node_name || '_transaction_logs' , node_name || '_transaction');
+      )', node_name || '_transaction_logs');
 END
 $func$;
 
@@ -162,4 +163,3 @@ BEGIN
 END;
 $$
 LANGUAGE plpgsql;
-

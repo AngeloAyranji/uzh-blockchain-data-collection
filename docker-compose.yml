@@ -25,6 +25,19 @@ services:
       - 'max_connections=${POSTGRES_MAX_CONNECTIONS}'
       - -c
       - 'listen_addresses=*'
+      # Abacus-3 specific settings
+      - -c
+      - 'max_worker_processes=32'
+      - -c
+      - 'max_parallel_workers_per_gather=16'
+      - -c
+      - 'max_parallel_workers=32'
+      - -c
+      - 'work_mem=256 MB'
+      - -c
+      - 'shared_buffers=4 GB'
+      - -c
+      - 'effective_io_concurrency=16'
     group_add:
       - ${DATA_GID}
     ports:
@@ -69,8 +82,8 @@ services:
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
     volumes:
-      - ${DATA_DIR}/zookeeper-data/data:/data
-      - ${DATA_DIR}/zookeeper-data/datalog:/datalog
+      - ${KAFKA_DATA_DIR}/zookeeper-data/data:/data
+      - ${KAFKA_DATA_DIR}/zookeeper-data/datalog:/datalog
   kafka:
     build:
       context: ./src/kafka
@@ -91,11 +104,12 @@ services:
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - KAFKA_AUTO_CREATE_TOPICS_ENABLE=false
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_SESSION_TIMEOUT_MS=300000                 # attempt to prevent OffsetCommit failed
       - KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=10000    # delay the initial rebalancing by 10s
       - KAFKA_LOG_DIRS=/kafka/kafka-logs
       - KAFKA_CREATE_TOPICS=eth:${KAFKA_N_PARTITIONS}:1,etc:${KAFKA_N_PARTITIONS}:1,bsc:${KAFKA_N_PARTITIONS}:1
     volumes:
-      - ${DATA_DIR}/kafka-data:/kafka
+      - ${KAFKA_DATA_DIR}/kafka-data:/kafka
 
   # Redis
   redis:

@@ -43,7 +43,7 @@ class TransactionProcessor:
         """Insert required contract data into the database depending on its category"""
         # Transaction is creating a contract if to_address is None
         log.info(
-            f"New contract ({contract.address}) creation in {tx_data.transaction_hash}"
+            f"New contract ({contract.address}, {category}) creation in {tx_data.transaction_hash}"
         )
 
         if category.is_erc:

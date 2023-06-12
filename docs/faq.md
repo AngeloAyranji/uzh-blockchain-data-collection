@@ -24,3 +24,5 @@
     * Another Kafka internal log that can be ignored, the coordinator is eventually selected and this error is irrelevant.
 * Why am I seeing `Heartbeat failed for group eth because it is rebalancing` in the logs?
     * Another Kafka internal log that can be ignored. Happens when the number of consumers changes because kafka has to rebalance the partitions for a topic.
+* `asyncpg.exceptions.ProtocolViolationError: the database system is not yet accepting connections`
+    * Very rarely, usually after moving the data directory, the PostgreSQL service won't start in time and you'll see this error right after starting the data collection process. The solution is to just restart the process after this occurs.

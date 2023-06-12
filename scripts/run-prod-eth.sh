@@ -2,7 +2,7 @@
 
 set -e
 source scripts/util/prepare-env.sh
-source scripts/util/prepare-data-dir.sh $DATA_DIR $KAFKA_N_PARTITIONS
+source scripts/util/prepare-data-dir.sh $DATA_DIR $KAFKA_DATA_DIR $KAFKA_N_PARTITIONS
 source scripts/util/compose-cleanup.sh
 
 echo "Building containers..."

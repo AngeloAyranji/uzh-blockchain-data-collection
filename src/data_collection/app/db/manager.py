@@ -136,8 +136,7 @@ class DatabaseManager:
         await self.db.execute(
             f"""
             INSERT INTO {table} (transaction_hash, from_address, to_address, value, gas_limit, gas_used, input_data, call_type)
-            VALUES ($1, $2, $3,$4, $5, $6,$7,$8)
-            ON CONFLICT (unique_id) DO NOTHING;
+            VALUES ($1, $2, $3,$4, $5, $6,$7,$8);
             """,
             transaction_hash,
             from_address,

@@ -2,7 +2,7 @@ version: "3.9"
 services:
   kafka:
     environment:
-      - KAFKA_LOG_RETENTION_BYTES=134217728 # 128 MB
+      - KAFKA_LOG_RETENTION_BYTES=16777216 # 16 MB
 
   # Updated network settings for data producers and consumers
   data_producer_eth:
