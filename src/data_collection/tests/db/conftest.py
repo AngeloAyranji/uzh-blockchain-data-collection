@@ -92,6 +92,11 @@ def block_data() -> dict[str, Any]:
         miner="0xea674fdde714fd979de3edf0f56aa9716b898ec8",
         parent_hash="0x3d1131b702e9aa071fb15970b4271cde104e5802b542f478782f5b1ef0ffa436",
         block_reward=2.052229489633251327,
+        uncles=[
+            "0x3d1131b702e9aa071fb15970b4271cde104e5802b542f478782f5b1ef0ffa436",
+            "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+            "0xddc8b0234c2e0cad087c8b389aa7ef01f7d79b2570bccb77ce48648aa61c904d",
+        ],
     )
 
 

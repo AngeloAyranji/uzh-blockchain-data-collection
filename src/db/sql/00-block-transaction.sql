@@ -16,6 +16,7 @@ BEGIN
        miner varchar,
        parent_hash varchar,
        block_reward numeric(78,18),
+       uncles varchar ARRAY,
        updated_at TIMESTAMP
       )', node_name || '_block');
 END

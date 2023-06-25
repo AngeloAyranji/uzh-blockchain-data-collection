@@ -19,6 +19,7 @@ class BlockData(Web3BaseModel):
     transactions: List[str]
     miner: str
     parent_hash: str = Field(..., alias="parentHash")
+    uncles: List[str]
 
     @validator("timestamp", pre=True)
     def timestamp_to_datetime(cls, v):

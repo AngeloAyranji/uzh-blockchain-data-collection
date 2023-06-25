@@ -51,6 +51,7 @@ class DatabaseManager:
         miner: str,
         parent_hash: str,
         block_reward: float,
+        uncles: list[str],
     ):
         """
         Insert block data into <node>_block table.
@@ -60,8 +61,8 @@ class DatabaseManager:
 
         await self.db.execute(
             f"""
-            INSERT INTO {table} (block_number, block_hash, nonce, difficulty, gas_limit, gas_used, timestamp, miner, parent_hash, block_reward)
-            VALUES ($1, $2, $3,$4, $5, $6,$7,$8, $9, $10)
+            INSERT INTO {table} (block_number, block_hash, nonce, difficulty, gas_limit, gas_used, timestamp, miner, parent_hash, block_reward, uncles)
+            VALUES ($1, $2, $3,$4, $5, $6,$7,$8, $9, $10, $11)
             ON CONFLICT (block_number) DO NOTHING;
             """,
             block_number,
@@ -74,6 +75,7 @@ class DatabaseManager:
             miner,
             parent_hash,
             block_reward,
+            uncles,
         )
 
     async def insert_transaction(

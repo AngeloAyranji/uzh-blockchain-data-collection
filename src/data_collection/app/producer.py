@@ -121,8 +121,8 @@ class DataProducer(DataCollector):
                 # Insert new block
                 block_reward = 0
                 if get_block_reward:
-                    # FIXME: call trace_block to get static block reward
-                    pass
+                    block_reward = await self.node_connector.get_block_reward(i_block)
+                    
 
                 await self._insert_block(
                     block_data=block_data, block_reward=block_reward
@@ -269,7 +269,5 @@ class DataProducer(DataCollector):
         del block_data_dict["transactions"]
         await self.db_manager.insert_block(
             **block_data_dict,
-            # TODO: need to calculate the block reward
-            # https://ethereum.stackexchange.com/questions/5958/how-to-query-the-amount-of-mining-reward-from-a-certain-block
             block_reward=block_reward,
         )
