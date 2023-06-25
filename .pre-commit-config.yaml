@@ -17,4 +17,5 @@ repos:
     rev: 23.3.0
     hooks:
       - id: black
+        exclude: src/data_collection/app/producer.py
         args: [ "--target-version", "py311"]

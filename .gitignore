@@ -25,4 +25,5 @@ htmlcov/
 # Data folder
 data/
 data-dev/
+/data*/
 /package-lock.json

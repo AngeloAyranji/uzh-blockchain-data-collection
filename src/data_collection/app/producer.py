@@ -170,6 +170,26 @@ class DataProducer(DataCollector):
                     f"Finished at block #{i_processed_block} | total produced transactions: {_total_transactions}"
                 )
 
+    async def _start_get_logs_producer(
+        self, data_collection_cfg: DataCollectionConfig
+    ):
+        """Start a producer that uses the `eth_getLogs` RPC method to get all the transactions"""
+        # Get logs
+        logs = await self.node_connector.w3.eth.get_logs(filter_params=data_collection_cfg.params)
+
+        # Send them to Kafka
+        if logs:
+            # Encode the logs as kafka events
+            messages = [
+                self.encode_kafka_event(log["transactionHash"].hex(), data_collection_cfg.mode)
+                for log in logs
+            ]
+            # Send all the transaction hashes to Kafka so consumers can process them
+            await self.kafka_manager.send_batch(msgs=messages)
+
+        log.info(f"Finished collecting {len(logs)} logs")
+
+
     async def _start_producer_task(
         self, data_collection_cfg: DataCollectionConfig
     ) -> asyncio.Task:
@@ -177,9 +197,10 @@ class DataProducer(DataCollector):
         Start a producer task depending on the data collection config producer type.
         """
         pretty_config = data_collection_cfg.dict(exclude={"contracts"})
-        pretty_config["contracts"] = list(
-            map(lambda c: c.symbol, data_collection_cfg.contracts)
-        )
+        if data_collection_cfg.contracts:
+            pretty_config["contracts"] = list(
+                map(lambda c: c.symbol, data_collection_cfg.contracts)
+            )
         log.info(f"Creating data collection producer task ({pretty_config})")
         # Log information about the producer
         n_partitions = await self.kafka_manager.number_of_partitions
@@ -199,6 +220,10 @@ class DataProducer(DataCollector):
             case DataCollectionMode.LOG_FILTER:
                 return asyncio.create_task(
                     self._start_logfilter_producer(data_collection_cfg)
+                )
+            case DataCollectionMode.GET_LOGS:
+                return asyncio.create_task(
+                    self._start_get_logs_producer(data_collection_cfg)
                 )
 
     async def start_producing_data(self) -> int:

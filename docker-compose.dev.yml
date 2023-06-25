@@ -1,26 +1,45 @@
 version: "3.9"
 services:
+  kafka:
+    environment:
+      - KAFKA_CREATE_TOPICS=eth:4:1,etc:4:1,bsc:4:1
+
   # Different configuration files for data producers and consumers
   data_producer_eth:
+    environment:
+      KAFKA_N_PARTITIONS: 4
     command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/dev/eth.json --worker-type producer"
 
   data_producer_etc:
+    environment:
+      KAFKA_N_PARTITIONS: 4
     command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/dev/etc.json --worker-type producer"
 
   data_producer_bsc:
+    environment:
+      KAFKA_N_PARTITIONS: 4
     command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/dev/bsc.json --worker-type producer"
 
   data_consumer_eth:
     command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/dev/eth.json --worker-type consumer"
     deploy:
       replicas: 2
+    environment:
+      KAFKA_N_PARTITIONS: 4
+      N_CONSUMER_INSTANCES: 1
 
   data_consumer_etc:
     command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/dev/etc.json --worker-type consumer"
     deploy:
       replicas: 2
+    environment:
+      KAFKA_N_PARTITIONS: 4
+      N_CONSUMER_INSTANCES: 1
 
   data_consumer_bsc:
     command: bash -c "bash wait-for-kafka.sh && python3 -m app.main --cfg etc/cfg/dev/bsc.json --worker-type consumer"
     deploy:
       replicas: 2
+    environment:
+      KAFKA_N_PARTITIONS: 4
+      N_CONSUMER_INSTANCES: 1

@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import (
     AnyUrl,
@@ -88,7 +88,7 @@ class DataCollectionConfig(BaseSettings):
     end_block: Optional[int]
     """Ending block number. Takes precedence over the setting in the db."""
 
-    contracts: List[ContractConfig]
+    contracts: Optional[List[ContractConfig]]
     """Contains a list of smart contract objects of interest.
 
     Note:
@@ -98,7 +98,15 @@ class DataCollectionConfig(BaseSettings):
     """
 
     topics: Optional[List[Any]]
-    """Can be empty, required when used with ProducerType.LOG_FILTER"""
+    """Can be none, required when used with DataCollectionMode.LOG_FILTER"""
+
+    params: Optional[Dict[str, Any]]
+    """Can be none, required when used with DataCollectionMode.GET_LOGS
+
+    Note:
+        This field has to have the same JSON format as the eth_getLogs RPC method:
+        https://www.quicknode.com/docs/ethereum/eth_getLogs
+    """
 
     @root_validator
     def block_order_correct(cls, values):
@@ -124,6 +132,9 @@ class DataCollectionConfig(BaseSettings):
         elif mode == DataCollectionMode.PARTIAL:
             if values.get("contracts") is None:
                 raise ValueError(f'"mode": "partial" requires "contracts" field')
+        elif mode == DataCollectionMode.GET_LOGS:
+            if values.get("params") is None:
+                raise ValueError(f'"mode": "get_logs" requires "params" field')
         return values
 
 

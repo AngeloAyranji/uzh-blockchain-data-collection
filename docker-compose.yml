@@ -104,7 +104,8 @@ services:
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - KAFKA_AUTO_CREATE_TOPICS_ENABLE=false
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
-      - KAFKA_SESSION_TIMEOUT_MS=300000                 # attempt to prevent OffsetCommit failed
+      - KAFKA_SESSION_TIMEOUT_MS=30000                 # attempt to prevent OffsetCommit failed
+      - KAFKA_MAX_POLL_INTERVAL_MS=300000              # attempt to prevent OffsetCommit failed
       - KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=10000    # delay the initial rebalancing by 10s
       - KAFKA_LOG_DIRS=/kafka/kafka-logs
       - KAFKA_CREATE_TOPICS=eth:${KAFKA_N_PARTITIONS}:1,etc:${KAFKA_N_PARTITIONS}:1,bsc:${KAFKA_N_PARTITIONS}:1

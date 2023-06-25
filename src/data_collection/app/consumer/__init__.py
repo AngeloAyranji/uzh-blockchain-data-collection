@@ -43,7 +43,8 @@ class DataConsumer(DataCollector):
         # Create a set from all the contracts (we want to save any of these transactions)
         contracts = set()
         for data_cfg in config.data_collection:
-            contracts = contracts.union(set(data_cfg.contracts))
+            if data_cfg.contracts:
+                contracts = contracts.union(set(data_cfg.contracts))
 
         # Extracts data from web3 smart contracts
         self.contract_parser = ContractParser(
@@ -57,8 +58,9 @@ class DataConsumer(DataCollector):
             self.node_connector,
             self.contract_parser,
         ]
+        self._default_tx_processor = FullTransactionProcessor(*_tx_processor_args)
         self.tx_processors = {
-            DataCollectionMode.FULL: FullTransactionProcessor(*_tx_processor_args),
+            DataCollectionMode.FULL: self._default_tx_processor,
             DataCollectionMode.PARTIAL: PartialTransactionProcessor(
                 *_tx_processor_args
             ),
@@ -93,7 +95,9 @@ class DataConsumer(DataCollector):
         ) = await self.node_connector.get_transaction_receipt_data(self._tx_hash)
 
         # Get the correct transaction processor for the given mode
-        tx_processor = self.tx_processors[mode]
+        # otherwise use the default tx processor
+        tx_processor = self.tx_processors.get(mode, self._default_tx_processor)
+        # Process the transaction
         self._n_processed_txs += await tx_processor.process_transaction(
             tx_data, tx_receipt_data, w3_tx_receipt
         )

@@ -36,6 +36,13 @@ class DataCollectionMode(StrEnum):
         producer will respect log_filter topics while producing transaction hashes to a Kafka topic
         consumers will insert every received transaction to the database
     """
+    GET_LOGS = auto()
+    """GET_LOGS data collection mode
+
+    Note:
+        producer will respect get_logs topics while producing transaction hashes to a Kafka topic
+        consumers will insert every received transaction and all the logs to the database
+    """
 
 
 class Web3BaseModel(BaseModel):

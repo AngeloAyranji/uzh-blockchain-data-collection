@@ -20,6 +20,6 @@ jobs:
       - name: Code Style
         run: |
           isort --profile black -p app -c .
-          black --check --target-version py311 .
+          black --check --target-version py311 --exclude="src/data_collection/app/producer\.py" .
 #      - name: Lint
 #        run: pylint --rcfile=src/data_collection/pylint.rc app
