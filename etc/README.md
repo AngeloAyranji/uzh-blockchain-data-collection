@@ -30,12 +30,15 @@ $ python etc/get_top_uniswap_pairs.py -n 2 -e TransferFungibleEvent
 For details see `python etc/get_top_uniswap_pairs.py --help`.
 
 ## Query Tool
-This script connects to a running PostgreSQL container and executes some pre-definde (complex) queries or statements.
+This script connects to a running PostgreSQL container and executes some pre-defined (complex) queries or statements.
 
 For usage check `python etc/query_tool.py --help`
 
+The query tool has also been used to plot the data from postgres e.g. for the data overview
+![Data overview](img/database_overview.png)
+
 ## Web3 request response times benchmark
-This script benchmarks various web3 method request response times and prints out the statistics.
+This script benchmarks various web3 method request response times and prints out the statistics. Useful for checking the state of the node and whether it is overloaded or not.
 
 ```
 $ python etc/web3_method_benchmark.py
