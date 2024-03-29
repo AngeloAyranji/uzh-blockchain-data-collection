@@ -13,7 +13,7 @@ source scripts/util/compose-cleanup.sh
 # Prepare the data directory for db only
 mkdir -p \
     $DATA_DIR/postgresql-data
-chown -R $DATA_UID:$DATA_GID $1
+chown -R $DATA_UID:$DATA_GID $DATA_DIR
 
 # Start the db
 docker compose \
