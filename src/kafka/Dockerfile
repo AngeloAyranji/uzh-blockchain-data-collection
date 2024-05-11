@@ -1,4 +1,4 @@
-FROM wurstmeister/kafka:2.13-2.8.1
+FROM fatal69100/kafka:2.8.1
 
 # User permission build args
 ARG KAFKA_USER=kafka

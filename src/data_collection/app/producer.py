@@ -210,8 +210,9 @@ class DataProducer(DataCollector):
 
         match data_collection_cfg.mode:
             case DataCollectionMode.FULL:
+                # TODO: Fix the issue with the block reward
                 return asyncio.create_task(
-                    self._start_producer(data_collection_cfg, get_block_reward=True)
+                    self._start_producer(data_collection_cfg, get_block_reward=False)
                 )
             case DataCollectionMode.PARTIAL:
                 return asyncio.create_task(
