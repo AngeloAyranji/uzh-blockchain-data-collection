@@ -158,6 +158,7 @@ class DatabaseManager:
         data: str,
         removed: bool,
         topics: list[str],
+        topic_0: str,
     ):
         """
         Insert transaction logs data into <node>_transaction_logs table.
@@ -167,8 +168,8 @@ class DatabaseManager:
 
         await self.db.execute(
             f"""
-            INSERT INTO {table} (transaction_hash, address, log_index, data, removed, topics)
-            VALUES ($1, $2, $3,$4, $5, $6)
+            INSERT INTO {table} (transaction_hash, address, log_index, data, removed, topics, topic_0)
+            VALUES ($1, $2, $3,$4, $5, $6, $7)
             ON CONFLICT (transaction_hash, log_index) DO NOTHING;
             """,
             transaction_hash,
@@ -177,6 +178,7 @@ class DatabaseManager:
             data,
             removed,
             topics,
+            topic_0,
         )
 
     async def insert_nft_transfer(

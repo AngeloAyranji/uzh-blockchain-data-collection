@@ -107,6 +107,7 @@ BEGIN
        log_index int,
        data varchar,
        removed boolean,
+       topic_0 varchar,
        topics varchar ARRAY,
        updated_at TIMESTAMP,
        PRIMARY KEY (transaction_hash, log_index)
