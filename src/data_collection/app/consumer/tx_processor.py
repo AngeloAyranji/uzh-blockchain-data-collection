@@ -202,7 +202,8 @@ class TransactionProcessor:
         ]
         async with self.db_manager.db.transaction():
             for tx_log in logs_to_save:
-                await self.db_manager.insert_transaction_logs(**tx_log.dict())
+                topic_0 = tx_log.topics.pop(0) if tx_log.topics else None
+                await self.db_manager.insert_transaction_logs(**tx_log.dict(), topic_0=topic_0)
 
         # check for AND insert internal transactions if needed
         internal_tx_data = await self.node_connector.get_internal_transactions(
